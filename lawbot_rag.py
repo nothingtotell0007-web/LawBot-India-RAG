@@ -1,22 +1,20 @@
-# lawbot_rag.py (Final Code for Cloud Deployment)
+# lawbot_rag.py
 
 import os
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.llms import HuggingFaceHub # LLM IMPORT (Cloud Hosted)
+from langchain_community.llms import HuggingFaceHub 
 from langchain.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
-import streamlit as st # REQUIRED to access st.secrets
+import streamlit as st 
 
 load_dotenv() 
 
 VECTOR_DB_PATH = "faiss_index_free" 
 
 # --- CRITICAL TOKEN SETUP FUNCTION ---
-# This ensures the HuggingFace API Token is available to the model.
+# This ensures the HuggingFace API Token is exported correctly for the LLM to use.
 def setup_huggingface_token():
-    """Reads the token from st.secrets and exports it to os.environ, 
-    where HuggingFaceHub expects to find it."""
     try:
         # 1. Read token securely from Streamlit's secrets store
         hf_token = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
@@ -56,7 +54,6 @@ def get_lawbot_response(query):
     try:
         # 1. Load the index using the free embedding model
         embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2") 
-        # Note: You must run ingest.py one last time locally if you haven't recently!
         db = FAISS.load_local(VECTOR_DB_PATH, embeddings, allow_dangerous_deserialization=True)
         retriever = db.as_retriever(search_kwargs={"k": 2}) 
     except Exception as e:
@@ -71,9 +68,9 @@ def get_lawbot_response(query):
     ])
 
     # 2. Initialize the LLM using the Hosted API Endpoint with the CORRECT REPO_ID
+    # Switching to a known, stable Hugging Face Inference Endpoint model
     llm = HuggingFaceHub(
-        # The corrected, stable public model ID
-        repo_id="mistralai/Mistral-7B-Instruct-v0.1", 
+        repo_id="mistralai/Mistral-7B-Instruct-v0.2", 
         model_kwargs={"temperature": 0.1, "max_length": 1000},
     ) 
 
