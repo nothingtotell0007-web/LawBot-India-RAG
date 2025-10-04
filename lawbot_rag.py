@@ -64,9 +64,9 @@ def get_lawbot_response(query):
         ("human", query)
     ])
 
-    # 2. Initialize the LLM using the Hosted API Endpoint with the CORRECTED REPO_ID
+    # 2. Initialize the LLM using the Hosted API Endpoint with the STABLE Model ID
     llm = HuggingFaceHub(
-        # **Switching to a known stable model supported by the free inference API**
+        # ***FINAL MODEL SWITCH TO HUGGINGFACE/ZEPHYR***
         repo_id="HuggingFaceH4/zephyr-7b-beta", 
         model_kwargs={"temperature": 0.1, "max_length": 1000},
     ) 
@@ -75,4 +75,5 @@ def get_lawbot_response(query):
         response = llm.invoke(prompt.format(context=context, query=query))
         return response
     except Exception as e:
+        # This catch should now handle rate limits or other temporary API issues
         return f"Error during generation: The model failed to respond. Check API status. Error: {e}"

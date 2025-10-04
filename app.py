@@ -3,50 +3,8 @@
 import streamlit as st
 from lawbot_rag import get_lawbot_response
 
-# app.py
-
-# ... other imports ...
-
-# CHANGE THIS LINE:
-st.set_page_config(page_title="LawBot: Legal Reference & Cybercrime Info", layout="wide") # <-- CHANGED TO "wide"
-
-# app.py (Add this CSS block near the top after imports)
-
-custom_css = """
-<style>
-/* Remove the top right 'Deploy' button and Streamlit footer */
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-
-/* Customizing the chat containers (bubbles) for a professional look */
-.stChatMessage {
-    padding: 0.5rem 1rem;
-    border-radius: 10px;
-    margin-bottom: 0.8rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-/* User's message bubble style */
-.stChatMessage [data-testid="stChatMessageContent"] {
-    background-color: #3B82F6; /* Bright blue for user */
-    color: white;
-    border-radius: 15px 15px 5px 15px; 
-    padding: 10px;
-}
-
-/* Assistant (LawBot) message bubble style */
-.stChatMessage:not([data-testid="stChatMessageContent"]) {
-    background-color: #1E2835; /* Same as app background */
-}
-
-/* Make LawBot's icon a law-related emoji for branding */
-[data-testid="stChatMessageContent"] .st-emotion-cache-1r3j1j { 
-    content: "⚖️"; /* Attempts to set custom avatar content for assistant */
-}
-
-</style>
-"""
-st.markdown(custom_css, unsafe_allow_html=True)
+# --- Configuration and Styling ---
+st.set_page_config(page_title="LawBot: Legal Reference & Cybercrime Info", layout="centered")
 
 st.title("⚖️ LawBot: Legal Reference and Cybercrime Information")
 st.markdown("""
