@@ -1,1 +1,30 @@
-git add .
+# ------------------------------------
+# 1. PYTHON VIRTUAL ENVIRONMENT (MUST BE IGNORED)
+# ------------------------------------
+venv/
+.venv/
+bin/
+Scripts/
+
+# ------------------------------------
+# 2. SECRETS AND CONFIGURATION FILES (CRUCIAL FOR SECURITY)
+# ------------------------------------
+# The .env file must NEVER be committed (it contains API keys)
+.env
+# Streamlit's secrets file must NEVER be committed
+.streamlit/secrets.toml
+# Streamlit local configuration
+.streamlit/config.toml
+
+# ------------------------------------
+# 3. GENERATED CACHE AND VECTOR DATABASE (TOO LARGE/LOCAL DATA)
+# ------------------------------------
+# Python compiled files
+__pycache__/
+# LangChain/FAISS vector store (generated locally, too large for GitHub)
+faiss_index_free/
+# Ollama local cache data (too large)
+.ollama/
+# Generic temporary files
+*.pyc
+*.log

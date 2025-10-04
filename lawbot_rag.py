@@ -1,18 +1,18 @@
-# lawbot_rag.py
+# lawbot_rag.py (Final Code for Cloud Deployment)
 
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.llms import Ollama
+# OLD: from langchain_community.llms import Ollama 
+from langchain_community.llms import HuggingFaceHub # <-- NEW LLM IMPORT
 from langchain.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
+import streamlit as st # Need Streamlit to access secrets
 
 load_dotenv() 
 
 VECTOR_DB_PATH = "faiss_index_free" 
 
 # --- SYSTEM PROMPT (The LawBot Persona with STRONG Guardrail) ---
-# lawbot_rag.py (Final, Hardened System Prompt)
-
 SYSTEM_PROMPT_TEMPLATE = """
 You are LawBot, a specialized, professional legal reference and cyber-security information tool.
 Your purpose is strictly limited to providing general definitions, procedures, and official reporting steps based ONLY on the provided context from legal documents.
@@ -30,15 +30,23 @@ Answer the user's question using ONLY the context provided below. DO NOT output 
 
 Context: {context}
 """
-# ... rest of lawbot_rag.py follows ...
 
 def get_lawbot_response(query):
     try:
+        # Load the index using the free embedding model
         embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2") 
         db = FAISS.load_local(VECTOR_DB_PATH, embeddings, allow_dangerous_deserialization=True)
         retriever = db.as_retriever(search_kwargs={"k": 2}) 
     except Exception as e:
-        return f"Error loading knowledge base: {e}. Did you run ingest.py successfully?"
+        # This error is now the fault of the deployment, not a local server
+        return f"Error loading knowledge base: {e}. Check deployment logs."
+
+    # 1. Access the API Token securely via Streamlit Secrets
+    try:
+        hf_api_token = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
+    except KeyError:
+        return "ERROR: HuggingFace API Token not found in Streamlit Secrets."
+
 
     retrieved_docs = retriever.invoke(query)
     context = "\n\n---\n\n".join([doc.page_content for doc in retrieved_docs])
@@ -48,12 +56,16 @@ def get_lawbot_response(query):
         ("human", query)
     ])
 
-    # Ollama must be running in the background for this to work.
-    llm = Ollama(model="mistral", temperature=0.1) 
+    # 2. Initialize the LLM using the Hosted API Endpoint
+    llm = HuggingFaceHub(
+        repo_id="mistralai/Mistral-7B-Instruct-v0.2", # Using a highly-rated free hosted model
+        huggingfacehub_api_token=hf_api_token, # Passing the token from Streamlit Secrets
+        model_kwargs={"temperature": 0.1, "max_length": 1000},
+    ) 
 
+    # 3. Generate response
     try:
-        # Format the prompt with both context and query for the LLM
         response = llm.invoke(prompt.format(context=context, query=query))
         return response
     except Exception as e:
-        return f"Error connecting to Mistral (Ollama). Is the Ollama server running? Error: {e}"
+        return f"Error during generation: The model failed to respond. Check API status. Error: {e}"
