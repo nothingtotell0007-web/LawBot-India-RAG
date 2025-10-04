@@ -13,14 +13,10 @@ load_dotenv()
 VECTOR_DB_PATH = "faiss_index_free" 
 
 # --- CRITICAL TOKEN SETUP FUNCTION ---
-# This ensures the HuggingFace API Token is exported correctly for the LLM to use.
 def setup_huggingface_token():
     """Reads the token from st.secrets and exports it to os.environ for the LLM to use."""
     try:
-        # 1. Read token securely from Streamlit's secrets store
         hf_token = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
-        
-        # 2. Export token to the standard OS environment variable
         os.environ["HUGGINGFACEHUB_API_TOKEN"] = hf_token
         return True
     except KeyError:
@@ -68,10 +64,10 @@ def get_lawbot_response(query):
         ("human", query)
     ])
 
-    # 2. Initialize the LLM using the Hosted API Endpoint with the CORRECT REPO_ID
-    # This model ID is known to be stable on the Inference API.
+    # 2. Initialize the LLM using the Hosted API Endpoint with the CORRECTED REPO_ID
     llm = HuggingFaceHub(
-        repo_id="mistralai/Mistral-7B-Instruct-v0.2", 
+        # **Switching to a known stable model supported by the free inference API**
+        repo_id="HuggingFaceH4/zephyr-7b-beta", 
         model_kwargs={"temperature": 0.1, "max_length": 1000},
     ) 
 
